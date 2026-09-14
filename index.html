@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Cara Makhluk Hidup Bertahan Hidup</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        adventure: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        sunflower: {
+                            500: '#eab308',
+                            600: '#ca8a04',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .custom-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .pulse-subtle {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+        /* Accessibility font scale classes */
+        .text-scale-sm { font-size: 0.95rem; }
+        .text-scale-md { font-size: 1.15rem; }
+        .text-scale-lg { font-size: 1.35rem; }
+        .text-scale-xl { font-size: 1.6rem; }
+    </style>
+</head>
+<body class="bg-adventure-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between select-none">
+
+    <header id="main-header" class="bg-adventure-700 text-white shadow-md p-4 sticky top-0 z-40 flex justify-between items-center transition-all">
+        <div class="flex items-center space-x-3">
+            <span class="text-3xl bg-white/20 p-2 rounded-2xl">🌿</span>
+            <div>
+                <h1 class="font-bold text-lg md:text-xl tracking-wide">PETUALANGAN ADAPTASI</h1>
+                <p class="text-xs text-adventure-100" id="header-subtitle">Kelas VIII SMPLB Tunarungu</p>
+            </div>
+        </div>
+        
+        <!-- Score & Progress Container -->
+        <div id="game-stats" class="hidden flex items-center space-x-4 bg-adventure-800/80 px-4 py-2 rounded-2xl border border-adventure-600">
+            <div class="text-center">
+                <span class="text-xs text-adventure-200 block">⭐ SKOR</span>
+                <span id="stat-score" class="font-black text-xl text-yellow-300">0</span>
+            </div>
+            <div class="h-8 w-px bg-adventure-600"></div>
+            <div class="text-center">
+                <span class="text-xs text-adventure-200 block">🎯 LEVEL</span>
+                <span id="stat-level" class="font-bold text-lg text-white">1/5</span>
+            </div>
+            <div class="h-8 w-px bg-adventure-600 hidden sm:block"></div>
+            <div class="hidden sm:block text-center">
+                <span class="text-xs text-adventure-200 block">SOAL</span>
+                <span id="stat-question" class="font-bold text-lg text-white">1/25</span>
+            </div>
+        </div>
+
+        <!-- Utility Buttons (Buku Materi, Aksesibilitas, Keluar) -->
+        <div class="flex items-center space-x-2">
+            <button onclick="openBukuMateri()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-xl font-bold flex items-center space-x-1 shadow transition active:scale-95 text-sm" title="Buku Materi">
+                <i class="fa-solid fa-book"></i>
+                <span class="hidden md:inline">Buku Materi</span>
+            </button>
+            <button onclick="openAccessibilityModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-xl font-bold flex items-center shadow transition active:scale-95 text-sm" title="Aksesibilitas">
+                <i class="fa-solid fa-universal-access text-lg"></i>
+            </button>
+            <button onclick="confirmExit()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 rounded-xl font-bold flex items-center space-x-1 shadow transition active:scale-95 text-sm" title="Keluar">
+                <i class="fa-solid fa-door-open"></i>
+                <span class="hidden md:inline">Keluar</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-6 max-w-4xl flex flex-col justify-center">
+        <!-- Dynamic Viewport injected via JavaScript -->
+        <div id="app-container" class="w-full">
+            <!-- Initial content will be loaded by initGame() -->
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-adventure-100 p-3 shadow-inner">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 space-y-2 sm:space-y-0">
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+                <span id="footer-status-text" class="font-semibold text-adventure-700">Visual, Interaktif & Ramah Tunarungu</span>
+            </div>
+            <div id="footer-progress-wrapper" class="hidden w-full sm:w-1/2 flex items-center space-x-3">
+                <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                    <div id="footer-progress-bar" class="bg-adventure-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <span id="footer-progress-pct" class="font-bold text-adventure-800">0%</span>
+            </div>
+            <div>
+                <button onclick="speakCurrentPage()" class="bg-adventure-100 hover:bg-adventure-200 text-adventure-800 px-3 py-1.5 rounded-lg font-bold flex items-center space-x-1 border border-adventure-300 transition">
+                    <i class="fa-solid fa-volume-high text-adventure-600"></i>
+                    <span>Dengarkan Lagi</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- BUKU MATERI MODAL -->
+    <div id="modal-buku" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col custom-shadow overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="bg-amber-500 text-white p-4 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-book-open text-2xl"></i>
+                    <h2 class="text-xl font-bold">BUKU MATERI ADAPTASI</h2>
+                </div>
+                <button onclick="closeBukuMateri()" class="bg-white/20 hover:bg-white/30 text-white w-10 h-10 rounded-full flex items-center justify-center text-lg transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 text-slate-700 text-scale-md" id="buku-content">
+                <!-- Populated dynamically -->
+            </div>
+            <div class="bg-slate-100 p-4 border-t flex justify-end">
+                <button onclick="closeBukuMateri()" class="bg-adventure-600 hover:bg-adventure-700 text-white px-6 py-2.5 rounded-xl font-bold shadow transition">
+                    Tutup Buku
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXIT CONFIRMATION MODAL -->
+    <div id="modal-exit" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 custom-shadow text-center space-y-4">
+            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto text-3xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800">KELUAR DARI PERMAINAN?</h3>
+            <p class="text-slate-600 text-scale-sm">Apakah kamu yakin ingin berhenti bermain? Progress dan skor kamu akan disimpan dengan aman.</p>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="closeExitModal()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold shadow transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-play"></i>
+                    <span>LANJUT BERMAIN</span>
+                </button>
+                <button onclick="executeExit()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-3 rounded-xl font-bold shadow transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-door-open"></i>
+                    <span>KELUAR</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXIT SUMMARY MODAL / SAMPAI JUMPA -->
+    <div id="modal-sampai-jumpa" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 custom-shadow text-center space-y-4">
+            <div class="w-16 h-16 bg-adventure-100 text-adventure-600 rounded-full flex items-center justify-center mx-auto text-3xl">
+                <i class="fa-solid fa-hand-wave"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800">👋 SAMPAI JUMPA!</h3>
+            <p class="text-slate-600 text-scale-sm">Petualanganmu berhenti sampai di sini. Skor sementara dan posisimu telah tersimpan.</p>
+            <div class="bg-adventure-50 p-4 rounded-2xl border border-adventure-200 text-left space-y-1">
+                <div class="flex justify-between font-bold text-slate-700">
+                    <span>Skor Sementara:</span>
+                    <span id="exit-summary-score" class="text-adventure-700">0 / 250</span>
+                </div>
+                <div class="flex justify-between font-bold text-slate-700">
+                    <span>Progress:</span>
+                    <span id="exit-summary-progress" class="text-adventure-700">Level 1, Soal 1</span>
+                </div>
+            </div>
+            <div class="flex flex-col space-y-2 pt-2">
+                <button onclick="resumeGame()" class="bg-adventure-600 hover:bg-adventure-700 text-white py-3 rounded-xl font-bold shadow transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-play"></i>
+                    <span>▶️ LANJUTKAN NANTI (MAIN LAGI)</span>
+                </button>
+                <button onclick="goToMenu()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl font-bold transition">
+                    🏠 KEMBALI KE MENU UTAMA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACCESSIBILITY SETTINGS MODAL -->
+    <div id="modal-accessibility" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 custom-shadow space-y-5">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div class="flex items-center space-x-2 text-indigo-600">
+                    <i class="fa-solid fa-universal-access text-2xl"></i>
+                    <h3 class="text-xl font-bold">MODE AKSESIBILITAS</h3>
+                </div>
+                <button onclick="closeAccessibilityModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 w-9 h-9 rounded-full flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4 text-slate-700">
+                <!-- Sound Toggle -->
+                <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-volume-high text-indigo-600 text-lg"></i>
+                        <span class="font-semibold">Suara Narasi (TTS)</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="setting-sound" checked onchange="toggleSound(this)" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                    </label>
+                </div>
+
+                <!-- Speech Speed -->
+                <div class="bg-slate-50 p-3 rounded-xl space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <i class="fa-solid fa-gauge text-indigo-600 text-lg"></i>
+                            <span class="font-semibold">Kecepatan Suara</span>
+                        </div>
+                        <span id="speed-label" class="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded font-bold">Lambat</span>
+                    </div>
+                    <input type="range" id="setting-speed" min="0.5" max="1.2" step="0.1" value="0.7" oninput="updateSpeechSpeed(this.value)" class="w-full accent-indigo-600">
+                </div>
+
+                <!-- Text Scale -->
+                <div class="bg-slate-50 p-3 rounded-xl space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <i class="fa-solid fa-font text-indigo-600 text-lg"></i>
+                            <span class="font-semibold">Ukuran Teks</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setTextScale('sm')" class="bg-white border hover:bg-indigo-50 py-2 rounded-lg font-bold text-sm text-indigo-700">Normal</button>
+                        <button onclick="setTextScale('md')" class="bg-white border hover:bg-indigo-50 py-2 rounded-lg font-bold text-base text-indigo-700">Besar</button>
+                        <button onclick="setTextScale('lg')" class="bg-white border hover:bg-indigo-50 py-2 rounded-lg font-bold text-lg text-indigo-700">Sangat Besar</button>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeAccessibilityModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold shadow transition">
+                Simpan & Lanjutkan
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME STATE & DATA ---
+        const gameState = {
+            currentScreen: 'welcome', // 'welcome', 'instructions', 'map', 'study', 'level', 'question', 'feedback', 'mission', 'result'
+            score: 0,
+            currentLevel: 1, // 1 to 5
+            currentQuestionIndex: 0, // 0 to 24 overall or per level
+            correctAnswersCount: 0,
+            wrongAnswersCount: 0,
+            soundEnabled: true,
+            speechSpeed: 0.7,
+            textScale: 'md',
+            lastSpokenText: '',
+            selectedAnswerState: null,
+            isAnswerSubmitted: false,
+            // Mission End drag/drop match state
+            missionMatches: {}
+        };
+
+        // 25 Questions across 5 Levels (5 questions per level)
+        const levelsData = [
+            {
+                id: 1,
+                name: "Hutan",
+                icon: "🌳",
+                desc: "Adaptasi Morfologi & Bentuk Tubuh Hewan",
+                questions: [
+                    {
+                        id: 1,
+                        type: "multiple_choice",
+                        question: "Apa arti dari Adaptasi?",
+                        image: "🌱",
+                        options: [
+                            { text: "Menyesuaikan diri dengan lingkungan", correct: true },
+                            { text: "Berlari sangat cepat di hutan", correct: false },
+                            { text: "Tidur sepanjang hari", correct: false },
+                            { text: "Mencari teman baru", correct: false }
+                        ],
+                        explanation: "Adaptasi adalah kemampuan makhluk hidup untuk menyesuaikan diri dengan lingkungannya agar dapat mempertahankan hidup."
+                    },
+                    {
+                        id: 2,
+                        type: "multiple_choice",
+                        question: "Mengapa burung elang memiliki paruh tajam, bengkok, dan kuat?",
+                        image: "🦅",
+                        options: [
+                            { text: "Untuk mengisap nektar bunga", correct: false },
+                            { text: "Untuk mengoyak daging mangsa", correct: true },
+                            { text: "Untuk menyaring lumpur di air", correct: false },
+                            { text: "Untuk memakan rumput hijau", correct: false }
+                        ],
+                        explanation: "Burung elang adalah pemangsa. Paruh yang tajam dan bengkok membantunya mengoyak daging mangsa dengan mudah."
+                    },
+                    {
+                        id: 3,
+                        type: "multiple_choice",
+                        question: "Burung kolibri memiliki paruh panjang dan runcing. Apa fungsinya?",
+                        image: "🐦",
+                        options: [
+                            { text: "Mengisap nektar di dalam bunga", correct: true },
+                            { text: "Memanjat pohon tinggi", correct: false },
+                            { text: "Menangkap ikan di sungai", correct: false },
+                            { text: "Menggali tanah basah", correct: false }
+                        ],
+                        explanation: "Paruh panjang dan runcing pada kolibri sangat pas untuk menjangkau dan mengisap nektar di dalam bunga."
+                    },
+                    {
+                        id: 4,
+                        type: "true_false",
+                        question: "Kaki bebek yang berselaput berguna untuk membantunya berenang di air.",
+                        image: "🦆",
+                        options: [
+                            { text: "BENAR", correct: true },
+                            { text: "SALAH", correct: false }
+                        ],
+                        explanation: "Benar! Selaput pada kaki bebek berfungsi sebagai dayung alami saat berenang di air."
+                    },
+                    {
+                        id: 5,
+                        type: "multiple_choice",
+                        question: "Apa tujuan utama makhluk hidup melakukan adaptasi?",
+                        image: "⭐",
+                        options: [
+                            { text: "Agar terlihat indah di hutan", correct: false },
+                            { text: "Mempertahankan hidup dan tidak punah", correct: true },
+                            { text: "Supaya bisa terbang tinggi", correct: false },
+                            { text: "Agar dapat tidur lelap", correct: false }
+                        ],
+                        explanation: "Tujuan utama adaptasi adalah agar makhluk hidup bisa bertahan hidup dan tidak punah di lingkungannya."
+                    }
+                ]
+            },
+            {
+                id: 2,
+                name: "Padang Pasir",
+                icon: "🏜️",
+                desc: "Adaptasi Tumbuhan Xerofit (Kering)",
+                questions: [
+                    {
+                        id: 6,
+                        type: "multiple_choice",
+                        question: "Kaktus hidup di tempat yang sangat kering. Apa nama jenis tumbuhan ini?",
+                        image: "🌵",
+                        options: [
+                            { text: "Xerofit", correct: true },
+                            { text: "Hidrofit", correct: false },
+                            { text: "Higrofit", correct: false },
+                            { text: "Halofit", correct: false }
+                        ],
+                        explanation: "Xerofit adalah sebutan untuk tumbuhan yang hidup di tempat kering atau minim air seperti gurun."
+                    },
+                    {
+                        id: 7,
+                        type: "multiple_choice",
+                        question: "Mengapa daun kaktus berubah bentuk menjadi duri?",
+                        image: "🌵",
+                        options: [
+                            { text: "Untuk menangkap serangga", correct: false },
+                            { text: "Untuk mengurangi penguapan air", correct: true },
+                            { text: "Agar terlihat menyeramkan", correct: false },
+                            { text: "Untuk menyerap cahaya matahari", correct: false }
+                        ],
+                        explanation: "Daun berbentuk duri pada kaktus berfungsi mengurangi penguapan air di udara panas."
+                    },
+                    {
+                        id: 8,
+                        type: "true_false",
+                        question: "Batang kaktus tebal karena berfungsi untuk menyimpan cadangan air.",
+                        image: "🌵",
+                        options: [
+                            { text: "BENAR", correct: true },
+                            { text: "SALAH", correct: false }
+                        ],
+                        explanation: "Benar! Batang kaktus yang gemuk dan berdaging dirancang khusus untuk menyimpan banyak air."
+                    },
+                    {
+                        id: 9,
+                        type: "image_choice",
+                        question: "Manakah tumbuhan yang hidup di tempat kering (padang pasir)?",
+                        image: "☀️",
+                        options: [
+                            { text: "Kaktus", image: "🌵", correct: true },
+                            { text: "Teratai", image: "🌸", correct: false },
+                            { text: "Padi", image: "🌾", correct: false },
+                            { text: "Eceng Gondok", image: "🌿", correct: false }
+                        ],
+                        explanation: "Kaktus adalah tanaman gurun (xerofit) yang sangat tahan di tempat kering."
+                    },
+                    {
+                        id: 10,
+                        type: "multiple_choice",
+                        question: "Apa bentuk penyesuaian kaktus terhadap cuaca sangat panas?",
+                        image: "🌡️",
+                        options: [
+                            { text: "Menggugurkan semua daun dan menyimpan air di batang", correct: true },
+                            { text: "Pindah ke sungai terdekat", correct: false },
+                            { text: "Tidur di dalam gua pasir", correct: false },
+                            { text: "Mengubah warna batang menjadi biru", correct: false }
+                        ],
+                        explanation: "Kaktus bertahan di cuaca panas dengan mengubah daun jadi duri dan menyimpan air di batangnya."
+                    }
+                ]
+            },
+            {
+                id: 3,
+                name: "Dunia Air",
+                icon: "🌊",
+                desc: "Adaptasi Tumbuhan Air & Hewan Akuatik",
+                questions: [
+                    {
+                        id: 11,
+                        type: "multiple_choice",
+                        question: "Bunga teratai hidup mengapung di air. Apa nama kelompok tumbuhan air?",
+                        image: "🌸",
+                        options: [
+                            { text: "Hidrofit", correct: true },
+                            { text: "Xerofit", correct: false },
+                            { text: "Mamalia", correct: false },
+                            { text: "Amfibi", correct: false }
+                        ],
+                        explanation: "Hidrofit adalah tumbuhan yang sebagian atau seluruh tubuhnya terendam atau mengapung di air."
+                    },
+                    {
+                        id: 12,
+                        type: "multiple_choice",
+                        question: "Mengapa daun teratai berbentuk lebar dan tipis?",
+                        image: "🍃",
+                        options: [
+                            { text: "Untuk mempercepat proses penguapan air berlebih", correct: true },
+                            { text: "Supaya menjadi tempat bermain ikan", correct: false },
+                            { text: "Agar tidak bisa tenggelam ke dasar", correct: false },
+                            { text: "Untuk menangkap serangga air", correct: false }
+                        ],
+                        explanation: "Daun teratai yang lebar dan tipis membantu proses penguapan air di permukaan daun dengan lancar."
+                    },
+                    {
+                        id: 13,
+                        type: "true_false",
+                        question: "Batang teratai memiliki rongga udara yang membuatnya bisa terapung di air.",
+                        image: "🌿",
+                        options: [
+                            { text: "BENAR", correct: true },
+                            { text: "SALAH", correct: false }
+                        ],
+                        explanation: "Benar! Rongga udara di dalam batang teratai berfungsi agar tumbuhan tetap tegak dan terapung di atas air."
+                    },
+                    {
+                        id: 14,
+                        type: "multiple_choice",
+                        question: "Mengapa paus dan lumba-lumba sering muncul ke permukaan air laut?",
+                        image: "🐳",
+                        options: [
+                            { text: "Mengambil oksigen untuk bernapas", correct: true },
+                            { text: "Berjemur menikmati terik matahari", correct: false },
+                            { text: "Mencari teman ikan kecil", correct: false },
+                            { text: "Menghindari air laut yang asin", correct: false }
+                        ],
+                        explanation: "Sebagai mamalia air, paus dan lumba-lumba bernapas dengan paru-paru sehingga harus naik ke permukaan."
+                    },
+                    {
+                        id: 15,
+                        type: "multiple_choice",
+                        question: "Burung pelatuk atau kakatua memiliki susunan jari kaki 2 ke depan dan 2 ke belakang. Fungsinya untuk...",
+                        image: "🦜",
+                        options: [
+                            { text: "Memanjat dan berpegangan kuat pada pohon", correct: true },
+                            { text: "Berenang di sungai deras", correct: false },
+                            { text: "Berlari di padang pasir", correct: false },
+                            { text: "Menggali pasir pantai", correct: false }
+                        ],
+                        explanation: "Susunan jari 2 di depan dan 2 di belakang sangat kuat untuk mencengkeram dan memanjat batang pohon."
+                    }
+                ]
+            },
+            {
+                id: 4,
+                name: "Lingkungan Sekitar",
+                icon: "🏡",
+                desc: "Adaptasi Fisiologi & Tingkah Laku",
+                questions: [
+                    {
+                        id: 16,
+                        type: "multiple_choice",
+                        question: "Sapi dan kambing memakan rumput berserat tinggi. Organ dalam tubuh mereka memiliki sistem khusus untuk mencerna...",
+                        image: "🐄",
+                        options: [
+                            { text: "Selulosa (bahan serat rumput)", correct: true },
+                            { text: "Batu kerikil kecil", correct: false },
+                            { text: "Logam berat", correct: false },
+                            { text: "Plastik organik", correct: false }
+                        ],
+                        explanation: "Ini adalah contoh adaptasi fisiologi. Sapi memiliki enzim dan mikroorganisme pencerna selulosa."
+                    },
+                    {
+                        id: 17,
+                        type: "multiple_choice",
+                        question: "Nyamuk betina mengeluarkan zat antikoagulan saat mengisap darah. Apa fungsinya?",
+                        image: "🦟",
+                        options: [
+                            { text: "Mencegah darah cepat membeku", correct: true },
+                            { text: "Membuat kulit korban mati rasa", correct: false },
+                            { text: "Mengharumkan aroma tubuh nyamuk", correct: false },
+                            { text: "Mempercepat pertumbuhan nyamuk", correct: false }
+                        ],
+                        explanation: "Zat antikoagulan mencegah darah membeku agar nyamuk lancar mengisap darah."
+                    },
+                    {
+                        id: 18,
+                        type: "multiple_choice",
+                        question: "Manusia yang tinggal di daerah pegunungan tinggi memiliki jumlah sel darah merah yang lebih banyak. Fungsinya untuk...",
+                        image: "🧑",
+                        options: [
+                            { text: "Membawa oksigen lebih banyak di udara tipis", correct: true },
+                            { text: "Menjaga tubuh agar tidak kedinginan", correct: false },
+                            { text: "Membuat badan menjadi sangat berat", correct: false },
+                            { text: "Menambah tinggi badan secara cepat", correct: false }
+                        ],
+                        explanation: "Di pegunungan oksigen lebih sedikit, sehingga sel darah merah yang banyak membantu mencukupi kebutuhan oksigen."
+                    },
+                    {
+                        id: 19,
+                        type: "multiple_choice",
+                        question: "Cicak memutuskan ekornya saat dikejar musuh. Istilah adaptasi tingkah laku ini disebut...",
+                        image: "🦎",
+                        options: [
+                            { text: "Autotomi", correct: true },
+                            { text: "Mimikri", correct: false },
+                            { text: "Hibernasi", correct: false },
+                            { text: "Fotosintesis", correct: false }
+                        ],
+                        explanation: "Autotomi adalah pelepasan bagian tubuh (ekor cicak) untuk mengelabui musuh."
+                    },
+                    {
+                        id: 20,
+                        type: "multiple_choice",
+                        question: "Bunglon dapat mengubah warna kulitnya sesuai tempat ia berada. Istilah adaptasi ini adalah...",
+                        image: "🦎",
+                        options: [
+                            { text: "Mimikri", correct: true },
+                            { text: "Autotomi", correct: false },
+                            { text: "Xerofit", correct: false },
+                            { text: "Hidrofit", correct: false }
+                        ],
+                        explanation: "Mimikri adalah kemampuan hewan mengubah warna tubuh untuk menyamar dan melindungi diri."
+                    }
+                ]
+            },
+            {
+                id: 5,
+                name: "Misi Akhir",
+                icon: "🏆",
+                desc: "Tantangan Penerapan & Analisis Lengkap",
+                questions: [
+                    {
+                        id: 21,
+                        type: "multiple_choice",
+                        question: "Pohon jati menggugurkan daunnya pada musim kemarau. Tujuannya adalah...",
+                        image: "🌳",
+                        options: [
+                            { text: "Mengurangi penguapan air", correct: true },
+                            { text: "Menyuburkan tanah di sekitar pohon", correct: false },
+                            { text: "Supaya terlihat bersih dari sampah", correct: false },
+                            { text: "Menarik perhatian burung merpati", correct: false }
+                        ],
+                        explanation: "Menggugurkan daun saat musim kemarau adalah cara pohon jati mengurangi penguapan agar tidak mati kekeringan."
+                    },
+                    {
+                        id: 22,
+                        type: "multiple_choice",
+                        question: "Daun tumbuhan putri malu akan mengatup ketika disentuh. Apa tujuan perilaku ini?",
+                        image: "🌿",
+                        options: [
+                            { text: "Merespons rangsangan dan melindungi diri dari pemangsa", correct: true },
+                            { text: "Mencari makanan di dalam tanah", correct: false },
+                            { text: "Menyerap air hujan lebih cepat", correct: false },
+                            { text: "Bersiap untuk tidur malam", correct: false }
+                        ],
+                        explanation: "Putri malu mengatupkan daunnya untuk mengecoh hewan pemakan tumbuhan (herbivora) seolah-olah layu."
+                    },
+                    {
+                        id: 23,
+                        type: "multiple_choice",
+                        question: "Beruang kutub melakukan hibernasi (tidur panjang) pada musim dingin. Tujuannya adalah...",
+                        image: "🐻",
+                        options: [
+                            { text: "Menghemat energi saat makanan sulit didapat", correct: true },
+                            { text: "Menghindari cuaca panas gurun", correct: false },
+                            { text: "Merawat anak-anak beruang", correct: false },
+                            { text: "Menunggu salju mencair jadi es krim", correct: false }
+                        ],
+                        explanation: "Hibernasi dilakukan untuk menghemat energi tubuh saat musim dingin yang ekstrem dan makanan langka."
+                    },
+                    {
+                        id: 24,
+                        type: "multiple_choice",
+                        question: "Rina melihat cicak melepaskan ekornya saat didekati kucing. Termasuk jenis adaptasi apakah perilaku cicak tersebut?",
+                        image: "🦎",
+                        options: [
+                            { text: "Adaptasi Tingkah Laku", correct: true },
+                            { text: "Adaptasi Morfologi", correct: false },
+                            { text: "Adaptasi Fisiologi", correct: false },
+                            { text: "Adaptasi Kimiawi", correct: false }
+                        ],
+                        explanation: "Memutuskan ekor (autotomi) adalah bentuk penyesuaian perilaku atau kebiasaan hewan untuk bertahan hidup."
+                    },
+                    {
+                        id: 25,
+                        type: "classification",
+                        question: "Manakah kelompok contoh yang termasuk ke dalam ADAPTASI FISIOLOGI (Fungsi organ tubuh)?",
+                        image: "⚙️",
+                        options: [
+                            { text: "Sapi mencerna rumput & Nyamuk berzat antikoagulan", correct: true },
+                            { text: "Kaki bebek berselaput & Paruh elang tajam", correct: false },
+                            { text: "Cicak putus ekor & Beruang hibernasi", correct: false },
+                            { text: "Kaktus berduri & Teratai daun lebar", correct: false }
+                        ],
+                        explanation: "Adaptasi fisiologi menyangkut fungsi organ dalam tubuh, seperti pencernaan sapi dan cairan antikoagulan nyamuk."
+                    }
+                ]
+            }
+        ];
+
+        // --- SPEECH SYNTHESIS HELPER (TTS) ---
+        function speakText(text) {
+            if (!gameState.soundEnabled) return;
+            if (!('speechSynthesis' in window)) return;
+            
+            window.speechSynthesis.cancel(); // Stop previous speech
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'id-ID';
+            utterance.rate = gameState.speechSpeed;
+            utterance.pitch = 1.0;
+            
+            window.speechSynthesis.speak(utterance);
+            gameState.lastSpokenText = text;
+        }
+
+        function speakCurrentPage() {
+            if (gameState.lastSpokenText) {
+                speakText(gameState.lastSpokenText);
+            }
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            initGame();
+        };
+
+        function initGame() {
+            renderWelcomeScreen();
+            buildBukuMateriContent();
+        }
+
+        // --- NAVIGATION & SCREEN RENDERERS ---
+        function renderWelcomeScreen() {
+            gameState.currentScreen = 'welcome';
+            hideStatsAndProgress();
+            
+            const html = `
+                <div class="bg-white rounded-3xl p-6 md:p-10 custom-shadow text-center space-y-6 animate-in fade-in duration-300">
+                    <div class="w-24 h-24 bg-adventure-100 text-adventure-600 rounded-full flex items-center justify-center mx-auto text-5xl shadow-inner pulse-subtle">
+                        🌿
+                    </div>
+                    <div class="space-y-2">
+                        <span class="bg-adventure-100 text-adventure-800 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Game Edukasi Interaktif IPA</span>
+                        <h2 class="text-2xl md:text-4xl font-black text-adventure-900 tracking-tight">PETUALANGAN CARA MAKHLUK HIDUP BERTAHAN HIDUP</h2>
+                        <p class="text-slate-600 text-scale-md italic">“Temukan rahasia adaptasi hewan, tumbuhan, dan manusia!”</p>
+                    </div>
+
+                    <!-- Penjelajah Cilik Character Illustration -->
+                    <div class="bg-adventure-50 border-2 border-adventure-200 rounded-2xl p-4 max-w-md mx-auto flex items-center space-x-4">
+                        <div class="text-4xl bg-white p-3 rounded-2xl shadow">🎒</div>
+                        <div class="text-left">
+                            <h3 class="font-bold text-adventure-800 text-scale-md">Halo, Penjelajah Cilik!</h3>
+                            <p class="text-slate-600 text-scale-sm">Siap menjelajah hutan, padang pasir, dan dunia air bersama tas petualanganmu?</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+                        <button onclick="goToInstructions()" class="bg-adventure-600 hover:bg-adventure-700 text-white font-bold px-8 py-4 rounded-2xl shadow-lg transition transform active:scale-95 flex items-center justify-center space-x-3 text-scale-md">
+                            <i class="fa-solid fa-play text-xl"></i>
+                            <span>MULAI PETUALANGAN</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+            speakText("Selamat datang di Petualangan Cara Makhluk Hidup Bertahan Hidup. Tekan Mulai Petualangan untuk bermain.");
+        }
+
+        function hideStatsAndProgress() {
+            document.getElementById('game-stats').classList.add('hidden');
+            document.getElementById('footer-progress-wrapper').classList.add('hidden');
+            document.getElementById('footer-status-text').innerText = "Visual, Interaktif & Ramah Tunarungu";
+        }
+
+        function showStatsAndProgress() {
+            document.getElementById('game-stats').classList.remove('hidden');
+            document.getElementById('footer-progress-wrapper').classList.remove('hidden');
+            updateStatsUI();
+        }
+
+        function updateStatsUI() {
+            document.getElementById('stat-score').innerText = gameState.score;
+            document.getElementById('stat-level').innerText = `${gameState.currentLevel}/5`;
+            
+            // Calculate overall question index (0 to 24)
+            const totalQIndex = ((gameState.currentLevel - 1) * 5) + gameState.currentQuestionIndex + 1;
+            document.getElementById('stat-question').innerText = `${totalQIndex}/25`;
+            
+            const percentage = Math.round((totalQIndex / 25) * 100);
+            document.getElementById('footer-progress-bar').style.width = `${percentage}%`;
+            document.getElementById('footer-progress-pct').innerText = `${percentage}%`;
+        }
+
+        function goToInstructions() {
+            gameState.currentScreen = 'instructions';
+            hideStatsAndProgress();
+            
+            const html = `
+                <div class="bg-white rounded-3xl p-6 md:p-8 custom-shadow space-y-6 animate-in fade-in duration-300">
+                    <div class="flex items-center space-x-3 border-b pb-4">
+                        <span class="text-3xl bg-amber-100 p-2 rounded-2xl">🎯</span>
+                        <div>
+                            <h2 class="text-xl md:text-2xl font-bold text-slate-800">PETUNJUK PERMAINAN</h2>
+                            <p class="text-slate-500 text-scale-sm">Cara asyik bermain dan belajar adaptasi</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-700 text-scale-sm">
+                        <div class="bg-slate-50 p-4 rounded-2xl border flex items-start space-x-3">
+                            <span class="bg-adventure-100 text-adventure-700 font-bold w-8 h-8 rounded-full flex items-center justify-center shrink-0">1</span>
+                            <p><strong>Baca dan amati materi</strong> sebelum menjawab tantangan di setiap lokasi.</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border flex items-start space-x-3">
+                            <span class="bg-adventure-100 text-adventure-700 font-bold w-8 h-8 rounded-full flex items-center justify-center shrink-0">2</span>
+                            <p><strong>Jawab tantangan soal</strong> dengan memilih jawaban yang paling tepat.</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border flex items-start space-x-3">
+                            <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-full flex items-center justify-center shrink-0">⭐</span>
+                            <p><strong>Jawaban Benar = +10 Poin!</strong> Jawaban Belum Tepat = +0 Poin.</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border flex items-start space-x-3">
+                            <span class="bg-amber-100 text-amber-700 font-bold w-8 h-8 rounded-full flex items-center justify-center shrink-0">💡</span>
+                            <p><strong>SALAH TETAP LANJUT!</strong> Tidak ada game over atau hukuman. Kamu selalu belajar dari setiap jawaban.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-adventure-50 border border-adventure-200 p-4 rounded-2xl text-center space-y-2">
+                        <p class="font-bold text-adventure-800 text-scale-md">🎒 Bekal Petualangan:</p>
+                        <p class="text-slate-600 text-scale-sm">Tas Petualangan, Peta Lokasi, Kaca Pembesar, dan Tombol 📖 Buku Materi yang bisa dibuka kapan saja!</p>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2">
+                        <button onclick="renderWelcomeScreen()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-6 py-3 rounded-xl font-bold transition">
+                            Kembali
+                        </button>
+                        <button onclick="goToMap()" class="bg-adventure-600 hover:bg-adventure-700 text-white px-8 py-3 rounded-xl font-bold shadow transition flex items-center space-x-2 text-scale-md">
+                            <span>BUKA PETA PETUALANGAN</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+            speakText("Petunjuk permainan. Baca materi, jawab tantangan. Jawaban benar plus sepuluh poin. Jawaban salah tetap lanjut. Tekan Buka Peta Petualangan.");
+        }
+
+        function goToMap() {
+            gameState.currentScreen = 'map';
+            showStatsAndProgress();
+            
+            const levelsInfo = [
+                { id: 1, name: "LEVEL 1 – HUTAN", icon: "🌳", desc: "Adaptasi Morfologi & Paruh Burung" },
+                { id: 2, name: "LEVEL 2 – PADANG PASIR", icon: "🏜️", desc: "Tumbuhan Xerofit & Kaktus" },
+                { id: 3, name: "LEVEL 3 – DUNIA AIR", icon: "🌊", desc: "Tumbuhan Hidrofit & Paus" },
+                { id: 4, name: "LEVEL 4 – LINGKUNGAN SEKITAR", icon: "🏡", desc: "Adaptasi Fisiologi & Tingkah Laku" },
+                { id: 5, name: "LEVEL 5 – MISI AKHIR", icon: "🏆", desc: "Penerapan & Analisis Lengkap" },
+            ];
+
+            let levelsHtml = '';
+            levelsInfo.forEach((lvl) => {
+                const isUnlocked = lvl.id <= gameState.currentLevel;
+                const isCompleted = lvl.id < gameState.currentLevel;
+                
+                levelsHtml += `
+                    <div onclick="${isUnlocked ? `startLevelStudy(${lvl.id})` : 'showLockedAlert()'}" 
+                         class="bg-white border-2 ${isUnlocked ? 'border-adventure-500 hover:bg-adventure-50 cursor-pointer shadow-md' : 'border-slate-200 opacity-60 cursor-not-allowed'} rounded-2xl p-4 flex items-center justify-between transition transform active:scale-98">
+                        <div class="flex items-center space-x-4">
+                            <span class="text-4xl bg-adventure-100 p-3 rounded-2xl">${lvl.icon}</span>
+                            <div>
+                                <h3 class="font-bold text-adventure-900 text-scale-md">${lvl.name}</h3>
+                                <p class="text-slate-500 text-scale-sm">${lvl.desc}</p>
+                            </div>
+                        </div>
+                        <div>
+                            ${isCompleted ? '<span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-bold">SELESAI ✅</span>' : 
+                              isUnlocked ? '<span class="bg-adventure-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow">MULAI ➔</span>' : 
+                              '<span class="bg-slate-200 text-slate-500 px-3 py-1 rounded-full text-xs font-bold">TERKUNCI 🔒</span>'}
+                        </div>
+                    </div>
+                `;
+            });
+
+            const html = `
+                <div class="bg-white rounded-3xl p-6 md:p-8 custom-shadow space-y-6 animate-in fade-in duration-300">
+                    <div class="flex items-center justify-between border-b pb-4">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-3xl bg-adventure-100 p-2 rounded-2xl">🗺️</span>
+                            <div>
+                                <h2 class="text-xl md:text-2xl font-bold text-slate-800">PETA PETUALANGAN</h2>
+                                <p class="text-slate-500 text-scale-sm">Pilih lokasi petualanganmu selanjutnya</p>
+                            </div>
+                        </div>
+                        <span class="bg-adventure-100 text-adventure-800 px-3 py-1 rounded-full font-bold text-sm">Level ${gameState.currentLevel} dari 5</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        ${levelsHtml}
+                    </div>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+            speakText(`Peta petualangan. Kamu berada di level ${gameState.currentLevel}. Pilih level untuk mulai belajar.`);
+        }
+
+        function showLockedAlert() {
+            speakText("Level ini masih terkunci. Selesaikan level sebelumnya terlebih dahulu.");
+            alertCustom("Level masih terkunci! Selesaikan level sebelumnya terlebih dahulu.");
+        }
+
+        function alertCustom(msg) {
+            // Non-intrusive alert toast or modal simulation
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white font-bold px-6 py-3 rounded-2xl shadow-2xl z-50 animate-bounce text-scale-sm';
+            alertDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2"></i> ${msg}`;
+            document.body.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 3000);
+        }
+
+        // --- PRE-LEVEL STUDY (PELAJARI DULU) ---
+        function startLevelStudy(levelId) {
+            gameState.currentLevel = levelId;
+            gameState.currentQuestionIndex = 0;
+            
+            // Get study cards for this level
+            const studyCards = getStudyCardsForLevel(levelId);
+            renderStudySession(studyCards, 0);
+        }
+
+        function getStudyCardsForLevel(levelId) {
+            if (levelId === 1) {
+                return [
+                    { title: "🌱 APA ITU ADAPTASI?", image: "🌳", text: "Adaptasi adalah kemampuan makhluk hidup untuk menyesuaikan diri dengan lingkungannya agar tidak punah." },
+                    { title: "🎯 TUJUAN ADAPTASI", image: "🛡️", text: "1. Mendapatkan makanan & air.\n2. Melindungi diri dari musuh.\n3. Bertahan pada cuaca panas atau dingin." },
+                    { title: "🐦 BENTUK PARUH BURUNG", image: "🦅", text: "• Elang: Paruh tajam & kuat untuk mengoyak daging.\n• Kolibri: Paruh panjang untuk mengisap nektar.\n• Bebek: Paruh lebar untuk menyaring makanan." },
+                    { title: "🦆 BENTUK KAKI BURUNG", image: "🦆", text: "• Bebek: Kaki berselaput untuk berenang di air.\n• Kakatua: 2 jari depan & 2 belakang untuk memanjat." }
+                ];
+            } else if (levelId === 2) {
+                return [
+                    { title: "🌵 TUMBUHAN KAKTUS", image: "🌵", text: "Kaktus hidup di tempat kering atau padang pasir. Disebut juga tanaman XEROFIT." },
+                    { title: "🌵 ADAPTASI KAKTUS", image: "☀️", text: "• Daun berubah menjadi duri untuk mengurangi penguapan air.\n• Batang tebal untuk menyimpan banyak air." }
+                ];
+            } else if (levelId === 3) {
+                return [
+                    { title: "🌸 BUNGA TERATAI", image: "🌸", text: "Teratai hidup di air (HIDROFIT).\n• Daun lebar dan tipis untuk membantu penguapan.\n• Batang berongga agar bisa terapung." },
+                    { title: "🐳 PAUS & LUMBA-LUMBA", image: "🐳", text: "Hewan air yang bernapas dengan paru-paru. Mereka harus sering muncul ke permukaan air untuk mengambil oksigen." }
+                ];
+            } else if (levelId === 4) {
+                return [
+                    { title: "🐄 ADAPTASI FISIOLOGI", image: "⚙️", text: "Penyesuaian fungsi organ dalam tubuh.\n• Sapi: Mencerna serat rumput.\n• Nyamuk: Zat antikoagulan darah.\n• Manusia di gunung: Sel darah merah lebih banyak." },
+                    { title: "🦎 ADAPTASI TINGKAH LAKU", image: "🦎", text: "Penyesuaian perilaku.\n• Cicak: Memutus ekor (Autotomi).\n• Bunglon: Mengubah warna kulit (Mimikri)." }
+                ];
+            } else {
+                return [
+                    { title: "🏆 MISI AKHIR: PENERAPAN", image: "⭐", text: "Kamu akan menguji seluruh ilmu adaptasi: Morfologi (bentuk tubuh), Fisiologi (fungsi organ), dan Tingkah Laku makhluk hidup!" },
+                    { title: "🌿 SIAP BERTUALANG?", image: "🚀", text: "Jawab 5 soal akhir dengan cermat. Ingat, jawaban salah tetap bernilai edukasi dan membantumu belajar!" }
+                ];
+            }
+        }
+
+        function renderStudySession(cards, cardIndex) {
+            gameState.currentScreen = 'study';
+            const card = cards[cardIndex];
+            const isLastCard = cardIndex === cards.length - 1;
+
+            const html = `
+                <div class="bg-white rounded-3xl p-6 md:p-8 custom-shadow space-y-6 animate-in fade-in duration-300 max-w-2xl mx-auto">
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-2xl bg-amber-100 p-2 rounded-xl">📖</span>
+                            <h3 class="font-bold text-slate-800 text-scale-md">PELAJARI DULU! (Level ${gameState.currentLevel})</h3>
+                        </div>
+                        <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-bold">Kartu ${cardIndex + 1} dari ${cards.length}</span>
+                    </div>
+
+                    <div class="bg-adventure-50 border-2 border-adventure-200 rounded-3xl p-6 text-center space-y-4">
+                        <div class="text-6xl bg-white w-20 h-20 rounded-2xl flex items-center justify-center mx-auto shadow">${card.image}</div>
+                        <h4 class="font-black text-adventure-900 text-xl md:text-2xl">${card.title}</h4>
+                        <p class="text-slate-700 text-scale-md whitespace-pre-line leading-relaxed">${card.text}</p>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2">
+                        ${cardIndex > 0 ? `<button onclick='renderStudySession(${JSON.stringify(cards)}, ${cardIndex - 1})' class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-3 rounded-xl font-bold transition">Sebelumnya</button>` : '<div></div>'}
+                        
+                        ${isLastCard ? 
+                            `<button onclick="startActiveLevelQuestions(${gameState.currentLevel})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3.5 rounded-2xl font-bold shadow-lg transition flex items-center space-x-2 text-scale-md">
+                                <i class="fa-solid fa-check"></i>
+                                <span>✅ SAYA SIAP BERTUALANG!</span>
+                            </button>` :
+                            `<button onclick='renderStudySession(${JSON.stringify(cards)}, ${cardIndex + 1})' class="bg-adventure-600 hover:bg-adventure-700 text-white px-8 py-3.5 rounded-2xl font-bold shadow-lg transition flex items-center space-x-2 text-scale-md">
+                                <span>Selanjutnya</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>`
+                        }
+                    </div>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+            speakText(`${card.title}. ${card.text}`);
+        }
+
+        // --- QUESTION & CHALLENGE ENGINE ---
+        function startActiveLevelQuestions(levelId) {
+            gameState.currentLevel = levelId;
+            gameState.currentQuestionIndex = 0;
+            renderCurrentQuestion();
+        }
+
+        function renderCurrentQuestion() {
+            gameState.currentScreen = 'question';
+            gameState.isAnswerSubmitted = false;
+            gameState.selectedAnswerState = null;
+            showStatsAndProgress();
+
+            const level = levelsData.find(l => l.id === gameState.currentLevel);
+            const question = level.questions[gameState.currentQuestionIndex];
+
+            let optionsHtml = '';
+            question.options.forEach((opt, idx) => {
+                const optLetter = ['A', 'B', 'C', 'D'][idx];
+                optionsHtml += `
+                    <button onclick="selectAnswer(${idx})" id="opt-btn-${idx}" class="w-full text-left bg-slate-50 hover:bg-adventure-50 border-2 border-slate-200 hover:border-adventure-400 p-4 rounded-2xl font-semibold text-slate-700 transition flex items-center space-x-4 active:scale-98 text-scale-md">
+                        <span class="w-9 h-9 bg-adventure-100 text-adventure-800 rounded-xl flex items-center justify-center font-black shrink-0">${optLetter}</span>
+                        <div class="flex-grow flex items-center justify-between">
+                            <span>${opt.text}</span>
+                            ${opt.image ? `<span class="text-3xl ml-2">${opt.image}</span>` : ''}
+                        </div>
+                    </button>
+                `;
+            });
+
+            const html = `
+                <div class="bg-white rounded-3xl p-6 md:p-8 custom-shadow space-y-6 animate-in fade-in duration-300 max-w-2xl mx-auto">
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-2xl bg-adventure-100 p-2 rounded-xl">${level.icon}</span>
+                            <span class="font-bold text-adventure-800 text-scale-sm">Level ${level.id} – ${level.name}</span>
+                        </div>
+                        <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-bold">Soal ${gameState.currentQuestionIndex + 1} / 5</span>
+                    </div>
+
+                    <div class="bg-adventure-50 border-2 border-adventure-200 rounded-3xl p-6 text-center space-y-4">
+                        <div class="text-6xl bg-white w-20 h-20 rounded-2xl flex items-center justify-center mx-auto shadow">${question.image}</div>
+                        <h3 class="font-black text-adventure-900 text-lg md:text-xl leading-snug">${question.question}</h3>
+                    </div>
+
+                    <div class="space-y-3" id="options-container">
+                        ${optionsHtml}
+                    </div>
+
+                    <div id="submit-action-container" class="pt-2">
+                        <button id="submit-ans-btn" onclick="submitAnswer()" disabled class="w-full bg-slate-300 text-slate-500 py-4 rounded-2xl font-bold shadow transition cursor-not-allowed text-scale-md">
+                            Pilih Jawaban Terlebih Dahulu
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+            speakText(`Soal. ${question.question}`);
+        }
+
+        function selectAnswer(idx) {
+            gameState.selectedAnswerState = idx;
+            const level = levelsData.find(l => l.id === gameState.currentLevel);
+            const question = level.questions[gameState.currentQuestionIndex];
+            
+            // Highlight selected button
+            question.options.forEach((opt, i) => {
+                const btn = document.getElementById(`opt-btn-${i}`);
+                if (i === idx) {
+                    btn.className = "w-full text-left bg-adventure-100 border-2 border-adventure-600 p-4 rounded-2xl font-semibold text-adventure-900 shadow-md transition flex items-center space-x-4 scale-[1.01]";
+                } else {
+                    btn.className = "w-full text-left bg-slate-50 hover:bg-adventure-50 border-2 border-slate-200 p-4 rounded-2xl font-semibold text-slate-700 transition flex items-center space-x-4";
+                }
+            });
+
+            // Enable submit button
+            const submitBtn = document.getElementById('submit-ans-btn');
+            submitBtn.disabled = false;
+            submitBtn.className = "w-full bg-adventure-600 hover:bg-adventure-700 text-white py-4 rounded-2xl font-bold shadow-lg transition active:scale-98 text-scale-md cursor-pointer";
+            submitBtn.innerText = "🚀 JAWAB SEKARANG";
+
+            speakText(`Pilihan ${['A', 'B', 'C', 'D'][idx]}: ${question.options[idx].text}`);
+        }
+
+        function submitAnswer() {
+            if (gameState.selectedAnswerState === null || gameState.isAnswerSubmitted) return;
+            gameState.isAnswerSubmitted = true;
+
+            const level = levelsData.find(l => l.id === gameState.currentLevel);
+            const question = level.questions[gameState.currentQuestionIndex];
+            const selectedOpt = question.options[gameState.selectedAnswerState];
+
+            const isCorrect = selectedOpt.correct;
+            if (isCorrect) {
+                gameState.score += 10;
+                gameState.correctAnswersCount++;
+            } else {
+                gameState.wrongAnswersCount++;
+            }
+
+            renderFeedbackScreen(isCorrect, question);
+        }
+
+        function renderFeedbackScreen(isCorrect, question) {
+            gameState.currentScreen = 'feedback';
+            showStatsAndProgress();
+
+            const correctOpt = question.options.find(o => o.correct);
+
+            const html = `
+                <div class="bg-white rounded-3xl p-6 md:p-8 custom-shadow space-y-6 animate-in fade-in duration-300 max-w-2xl mx-auto text-center">
+                    <div class="w-20 h-20 ${isCorrect ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'} rounded-full flex items-center justify-center mx-auto text-4xl shadow">
+                        ${isCorrect ? '🎉' : '💡'}
+                    </div>
+
+                    <div class="space-y-2">
+                        <h3 class="text-2xl font-black ${isCorrect ? 'text-emerald-700' : 'text-amber-700'}">
+                            ${isCorrect ? 'BENAR! +10 POIN' : 'BELUM TEPAT (+0 POIN)'}
+                        </h3>
+                        <p class="text-slate-600 text-scale-sm">
+                            ${isCorrect ? 'Hebat! Kamu menjawab dengan sangat tepat.' : 'Tidak apa-apa! Setiap kesalahan adalah kesempatan belajar.'}
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-5 text-left space-y-2">
+                        <p class="font-bold text-slate-800 text-scale-sm">📖 Penjelasan:</p>
+                        <p class="text-slate-700 text-scale-md">${question.explanation}</p>
+                        ${!isCorrect ? `<p class="text-emerald-700 font-semibold text-scale-sm pt-2">Jawaban yang benar: <strong>${correctOpt.text}</strong></p>` : ''}
+                    </div>
+
+                    <button onclick="proceedNextQuestion()" class="w-full bg-adventure-600 hover:bg-adventure-700 text-white py-4 rounded-2xl font-bold shadow-lg transition flex items-center justify-center space-x-2 text-scale-md">
+                        <span>➡️ LANJUTKAN PETUALANGAN</span>
+                    </button>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+            
+            const feedbackSpeech = isCorrect ? 
+                `Benar! Kamu mendapatkan sepuluh poin. ${question.explanation}` : 
+                `Belum tepat. Nilaimu nol poin. ${question.explanation}. Mari lanjut ke petualangan berikutnya.`;
+            speakText(feedbackSpeech);
+        }
+
+        function proceedNextQuestion() {
+            gameState.currentQuestionIndex++;
+            
+            if (gameState.currentQuestionIndex >= 5) {
+                // Level completed
+                if (gameState.currentLevel < 5) {
+                    gameState.currentLevel++;
+                    gameState.currentQuestionIndex = 0;
+                    renderLevelCompleteNotice();
+                } else {
+                    // All 5 levels (25 questions) finished!
+                    renderFinalResultScreen();
+                }
+            } else {
+                renderCurrentQuestion();
+            }
+        }
+
+        function renderLevelCompleteNotice() {
+            gameState.currentScreen = 'map';
+            const prevLevel = gameState.currentLevel - 1;
+            
+            const html = `
+                <div class="bg-white rounded-3xl p-6 md:p-8 custom-shadow space-y-6 animate-in fade-in duration-300 max-w-xl mx-auto text-center">
+                    <div class="w-24 h-24 bg-adventure-100 text-adventure-600 rounded-full flex items-center justify-center mx-auto text-5xl shadow">
+                        🏆
+                    </div>
+                    <div class="space-y-2">
+                        <h2 class="text-2xl font-black text-adventure-900">LEVEL ${prevLevel} SELESAI!</h2>
+                        <p class="text-slate-600 text-scale-md">Hebat! Kamu berhasil menyelesaikan tantangan dan mengumpulkan poin pengetahuan.</p>
+                    </div>
+                    <div class="bg-adventure-50 p-4 rounded-2xl border border-adventure-200">
+                        <span class="text-xs text-adventure-700 font-bold block">SKOR SEMENTARA</span>
+                        <span class="text-3xl font-black text-yellow-500">${gameState.score} POIN</span>
+                    </div>
+                    <button onclick="goToMap()" class="w-full bg-adventure-600 hover:bg-adventure-700 text-white py-4 rounded-2xl font-bold shadow-lg transition flex items-center justify-center space-x-2 text-scale-md">
+                        <span>🗺️ LANJUT KE PETA PETUALANGAN</span>
+                    </button>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+            speakText(`Level ${prevLevel} selesai. Skor kamu saat ini adalah ${gameState.score}. Lanjutkan ke peta petualangan.`);
+        }
+
+        // --- FINAL RESULTS ---
+        function renderFinalResultScreen() {
+            gameState.currentScreen = 'result';
+            hideStatsAndProgress();
+
+            let title = "";
+            let badge = "";
+            const s = gameState.score;
+            if (s >= 220) { title = "🏆 PENJELAJAH HEBAT"; badge = "Luar biasa! Kamu memahami semua konsep adaptasi dengan sempurna."; }
+            else if (s >= 170) { title = "🥇 PENJELAJAH CERDAS"; badge = "Hebat! Pengamatan dan pengetahuan adaptasimu sangat tajam."; }
+            else if (s >= 120) { title = "🥈 PENJELAJAH TANGGUH"; badge = "Bagus! Kamu sudah mengenal banyak cara makhluk hidup bertahan hidup."; }
+            else if (s >= 70) { title = "🥉 PENJELAJAH PEMULA"; badge = "Kerja bagus! Teruslah membaca buku materi dan mencoba lagi."; }
+            else { title = "🌱 TERUS BERLATIH"; badge = "Semangat! Jelajahi kembali materi adaptasi agar semakin mahir."; }
+
+            const html = `
+                <div class="bg-white rounded-3xl p-6 md:p-8 custom-shadow space-y-6 animate-in fade-in duration-300 max-w-2xl mx-auto text-center">
+                    <div class="w-24 h-24 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-5xl shadow pulse-subtle">
+                        🎉
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <span class="bg-amber-100 text-amber-800 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Misi Selesai</span>
+                        <h2 class="text-2xl md:text-3xl font-black text-slate-800">PETUALANGAN SELESAI!</h2>
+                        <p class="text-adventure-700 font-bold text-scale-lg">${title}</p>
+                    </div>
+
+                    <div class="bg-adventure-50 border-2 border-adventure-200 rounded-3xl p-6 space-y-4">
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div class="bg-white p-3 rounded-2xl shadow-sm">
+                                <span class="text-xs text-slate-500 block">SKOR AKHIR</span>
+                                <span class="text-3xl font-black text-yellow-500">${gameState.score} <span class="text-sm text-slate-400">/ 250</span></span>
+                            </div>
+                            <div class="bg-white p-3 rounded-2xl shadow-sm">
+                                <span class="text-xs text-slate-500 block">JAWABAN BENAR</span>
+                                <span class="text-3xl font-black text-emerald-600">${gameState.correctAnswersCount} <span class="text-sm text-slate-400">/ 25</span></span>
+                            </div>
+                        </div>
+                        <p class="text-slate-600 text-scale-sm italic">“${badge}”</p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-center gap-3 pt-2">
+                        <button onclick="restartGame()" class="bg-adventure-600 hover:bg-adventure-700 text-white font-bold px-6 py-3.5 rounded-2xl shadow transition flex items-center justify-center space-x-2 text-scale-sm">
+                            <i class="fa-solid fa-rotate-right"></i>
+                            <span>🔄 MAIN LAGI</span>
+                        </button>
+                        <button onclick="openBukuMateri()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-3.5 rounded-2xl shadow transition flex items-center justify-center space-x-2 text-scale-sm">
+                            <i class="fa-solid fa-book"></i>
+                            <span>📖 PELAJARI MATERI LAGI</span>
+                        </button>
+                        <button onclick="renderWelcomeScreen()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-6 py-3.5 rounded-2xl transition flex items-center justify-center space-x-2 text-scale-sm">
+                            <i class="fa-solid fa-house"></i>
+                            <span>🏠 KEMBALI KE MENU</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+            speakText(`Petualangan selesai! Skor akhir kamu adalah ${gameState.score} dari 250. Gelar kamu adalah ${title}. Hebat! Kamu sudah belajar tentang cara makhluk hidup bertahan hidup.`);
+        }
+
+        function restartGame() {
+            gameState.score = 0;
+            gameState.currentLevel = 1;
+            gameState.currentQuestionIndex = 0;
+            gameState.correctAnswersCount = 0;
+            gameState.wrongAnswersCount = 0;
+            renderWelcomeScreen();
+        }
+
+        function goToMenu() {
+            closeExitModal();
+            closeSampaiJumpaModal();
+            renderWelcomeScreen();
+        }
+
+        // --- BUKU MATERI POPULATE ---
+        function buildBukuMateriContent() {
+            const container = document.getElementById('buku-content');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-adventure-50 p-4 rounded-2xl border border-adventure-200 space-y-2">
+                        <h4 class="font-bold text-adventure-900 text-scale-md">1. APA ITU ADAPTASI?</h4>
+                        <p class="text-scale-sm">Adaptasi adalah kemampuan makhluk hidup untuk menyesuaikan diri dengan lingkungannya agar dapat mempertahankan hidup dan tidak punah.</p>
+                        <p class="text-xs bg-white p-2 rounded border font-semibold text-adventure-800">ADAPTASI = MENYESUAIKAN DIRI DENGAN LINGKUNGAN</p>
+                    </div>
+
+                    <div class="bg-adventure-50 p-4 rounded-2xl border border-adventure-200 space-y-2">
+                        <h4 class="font-bold text-adventure-900 text-scale-md">2. TUJUAN ADAPTASI</h4>
+                        <p class="text-scale-sm">🍎 1. Mendapatkan makanan dan air.<br>🛡️ 2. Melindungi diri dari musuh.<br>🌡️ 3. Bertahan pada cuaca ekstrem (sangat panas / sangat dingin).</p>
+                    </div>
+
+                    <div class="bg-adventure-50 p-4 rounded-2xl border border-adventure-200 space-y-2">
+                        <h4 class="font-bold text-adventure-900 text-scale-md">3. TIGA JENIS ADAPTASI</h4>
+                        <p class="text-scale-sm">
+                            <strong>🟦 Morfologi:</strong> Penyesuaian bentuk luar tubuh (Contoh: Paruh burung, bentuk kaktus, daun teratai).<br>
+                            <strong>🟩 Fisiologi:</strong> Penyesuaian fungsi organ dalam tubuh (Contoh: Pencernaan rumput pada sapi, sel darah merah manusia di pegunungan).<br>
+                            <strong>🟨 Tingkah Laku:</strong> Penyesuaian perilaku atau kebiasaan (Contoh: Cicak putus ekor, bunglon mimikri, beruang hibernasi).
+                        </p>
+                    </div>
+
+                    <div class="bg-adventure-50 p-4 rounded-2xl border border-adventure-200 space-y-2">
+                        <h4 class="font-bold text-adventure-900 text-scale-md">4. ADAPTASI TUMBUHAN</h4>
+                        <p class="text-scale-sm">
+                            🌵 <strong>Xerofit (Kering):</strong> Kaktus memiliki daun berupa duri untuk mengurangi penguapan dan batang tebal penyimpan air.<br>
+                            🌸 <strong>Hidrofit (Air):</strong> Teratai memiliki daun lebar untuk penguapan dan batang berongga untuk terapung.
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openBukuMateri() {
+            document.getElementById('modal-buku').classList.remove('hidden');
+            speakText("Buku Materi Adaptasi. Pelajari pengertian, tujuan, jenis morfologi, fisiologi, dan tingkah laku.");
+        }
+
+        function closeBukuMateri() {
+            document.getElementById('modal-buku').classList.add('hidden');
+        }
+
+        // --- EXIT MODAL SYSTEM ---
+        function confirmExit() {
+            document.getElementById('modal-exit').classList.remove('hidden');
+            speakText("Apakah kamu yakin ingin keluar dari permainan?");
+        }
+
+        function closeExitModal() {
+            document.getElementById('modal-exit').classList.add('hidden');
+        }
+
+        function executeExit() {
+            closeExitModal();
+            document.getElementById('exit-summary-score').innerText = `${gameState.score} / 250`;
+            document.getElementById('exit-summary-progress').innerText = `Level ${gameState.currentLevel}, Soal ${gameState.currentQuestionIndex + 1}`;
+            document.getElementById('modal-sampai-jumpa').classList.remove('hidden');
+            speakText("Sampai jumpa! Petualanganmu berhenti sampai di sini. Skor dan progressmu aman.");
+        }
+
+        function closeSampaiJumpaModal() {
+            document.getElementById('modal-sampai-jumpa').classList.add('hidden');
+        }
+
+        function resumeGame() {
+            closeSampaiJumpaModal();
+            // Return to current active screen without losing progress
+            if (gameState.currentScreen === 'question') {
+                renderCurrentQuestion();
+            } else if (gameState.currentScreen === 'map') {
+                goToMap();
+            } else {
+                renderWelcomeScreen();
+            }
+        }
+
+        // --- ACCESSIBILITY SETTINGS ---
+        function openAccessibilityModal() {
+            document.getElementById('modal-accessibility').classList.remove('hidden');
+            speakText("Mode Aksesibilitas. Atur suara, kecepatan, dan ukuran teks.");
+        }
+
+        function closeAccessibilityModal() {
+            document.getElementById('modal-accessibility').classList.add('hidden');
+        }
+
+        function toggleSound(checkbox) {
+            gameState.soundEnabled = checkbox.checked;
+            if (gameState.soundEnabled) {
+                speakText("Suara aktif.");
+            } else {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function updateSpeechSpeed(val) {
+            gameState.speechSpeed = parseFloat(val);
+            const label = val <= 0.6 ? "Sangat Lambat" : val <= 0.9 ? "Lambat" : "Normal";
+            document.getElementById('speed-label').innerText = label;
+            speakText(`Kecepatan suara diatur ${label}`);
+        }
+
+        function setTextScale(scale) {
+            gameState.textScale = scale;
+            const container = document.getElementById('app-container');
+            container.className = `w-full text-scale-${scale}`;
+            speakText(`Ukuran teks diubah.`);
+        }
+    </script>
+</body>
+</html>
